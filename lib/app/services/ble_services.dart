@@ -8,10 +8,10 @@ class BleServices {
 
   StreamSubscription<DiscoveredDevice>? _scanSubscription;
 
-  /// List of discovered devices
+  // List of discovered devices
   final List<DiscoveredDevice> discoveredDevices = [];
 
-  /// Start scanning
+  // Start scanning
   void startScan({
     required Function(List<DiscoveredDevice>) onDeviceFound,
     required Function(String error) onError,
@@ -50,12 +50,23 @@ class BleServices {
     await _scanSubscription?.cancel();
   }
 
-  /// Connect to a selected device
+  // Connect to a selected device
   Stream<ConnectionStateUpdate> connectToDevice(String deviceId) {
     return _ble.connectToDevice(
       id: deviceId,
       connectionTimeout: const Duration(seconds: 10),
     );
+  }
+
+  Future<List<Service>> discoverServices(String deviceId) async {
+    print("BleServices: Discovering all services for device $deviceId");
+    await _ble.discoverAllServices(deviceId);
+
+    print("BleServices: Getting discovered services");
+    final services = await _ble.getDiscoveredServices(deviceId);
+    print("BleServices: Found ${services.length} services");
+
+    return services;
   }
 
   Future<void> discoverDeviceServices(String deviceId) async {
@@ -85,6 +96,34 @@ class BleServices {
     } catch (e) {
       print("Discover Error: $e");
     }
+  }
+
+  Future<List<int>> readCharacteristic(
+    String deviceId,
+    Uuid serviceId,
+    Uuid characteristicId,
+  ) async {
+    return await _ble.readCharacteristic(
+      QualifiedCharacteristic(
+        deviceId: deviceId,
+        serviceId: serviceId,
+        characteristicId: characteristicId,
+      ),
+    );
+  }
+
+  Stream<List<int>> subscribeToCharacteristic(
+    String deviceId,
+    Uuid serviceId,
+    Uuid characteristicId,
+  ) {
+    return _ble.subscribeToCharacteristic(
+      QualifiedCharacteristic(
+        deviceId: deviceId,
+        serviceId: serviceId,
+        characteristicId: characteristicId,
+      ),
+    );
   }
 
   /// Disconnect
