@@ -30,84 +30,86 @@ class ConnectedDeviceView extends GetView<ConnectedDeviceController> {
                     return ExpansionTile(
                       title: Text(service.serviceId.toString()),
                       children: service.characteristics.map((c) {
+                        print("SERVICE: ${service.serviceId}");
+                        print("SERVICE: ${service.serviceId}");
                         return ListTile(
                           title: Text(c.characteristicId.toString()),
-                          subtitle: c.isReadable
+                          subtitle: c.isNotifiable
+                              ? StreamBuilder<List<int>>(
+                                  stream: controller.subscribeToCharacteristic(
+                                    service.serviceId,
+                                    c.characteristicId,
+                                  ),
+                                  builder: (context, snapshot) {
+                                    print("STREAM DATA: ${snapshot.data}");
+                                    print("STREAM ERROR: ${snapshot.error}");
+
+                                    if (snapshot.hasError) {
+                                      return Text("""
+Readable: ${c.isReadable}
+Writable: ${c.isWritableWithResponse}
+Notifiable: ${c.isNotifiable}
+
+Error: ${snapshot.error}
+""");
+                                    }
+
+                                    if (!snapshot.hasData) {
+                                      return Text("""
+Readable: ${c.isReadable}
+Writable: ${c.isWritableWithResponse}
+Notifiable: ${c.isNotifiable}
+
+Waiting for notifications...
+""");
+                                    }
+
+                                    final decodedValue = String.fromCharCodes(
+                                      snapshot.data!,
+                                    );
+
+                                    return Text("""
+Readable: ${c.isReadable}
+Writable: ${c.isWritableWithResponse}
+Notifiable: ${c.isNotifiable}
+
+Raw: ${snapshot.data}
+
+Decoded: $decodedValue
+""");
+                                  },
+                                )
+                              : c.isReadable
                               ? FutureBuilder<List<int>>(
                                   future: controller.readCharacteristic(
                                     service.serviceId,
                                     c.characteristicId,
                                   ),
                                   builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
+                                    if (snapshot.hasError) {
+                                      return Text("Error: ${snapshot.error}");
+                                    }
+
+                                    if (!snapshot.hasData) {
                                       return const Text(
                                         "Reading characteristic...",
                                       );
-                                    } else if (snapshot.hasError) {
-                                      return Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            Error: ${snapshot.error}
-            """);
-                                    } else if (snapshot.hasData) {
-                                      return Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            Value: ${snapshot.data}
-            """);
-                                    } else {
-                                      return Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            """);
                                     }
+
+                                    return Text("""
+Readable: ${c.isReadable}
+Writable: ${c.isWritableWithResponse}
+Notifiable: ${c.isNotifiable}
+
+Value: ${String.fromCharCodes(snapshot.data!)}
+""");
                                   },
                                 )
-                              : c.isNotifiable
-                                  ? StreamBuilder<List<int>>(
-                                      stream:
-                                          controller.subscribeToCharacteristic(
-                                        service.serviceId,
-                                        c.characteristicId,
-                                      ),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const Text(
-                                            "Waiting for notifications...",
-                                          );
-                                        } else if (snapshot.hasError) {
-                                          return Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            Error: ${snapshot.error}
-            """);
-                                        } else if (snapshot.hasData) {
-                                          return Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            Value: ${snapshot.data}
-            """);
-                                        } else {
-                                          return Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            """);
-                                        }
-                                      },
-                                    )
-                                  : Text("""
-            Readable: ${c.isReadable}
-            Writable: ${c.isWritableWithResponse}
-            Notifiable: ${c.isNotifiable}
-            """),
+                              : Text("""
+Readable: ${c.isReadable}
+Writable: ${c.isWritableWithResponse}
+Notifiable: ${c.isNotifiable}
+"""),
                         );
                       }).toList(),
                     );

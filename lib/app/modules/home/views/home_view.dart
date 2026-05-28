@@ -37,6 +37,7 @@ class HomeView extends GetView<HomeController> {
                       ),
                       subtitle: Text(device.id),
                       onTap: () {
+                        controller.stopScan;
                         Get.toNamed(
                           Routes.CONNECTED_DEVICE,
                           arguments: {"deviceId": device.id},

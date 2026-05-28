@@ -16,12 +16,12 @@ class ConnectedDeviceController extends GetxController {
   String deviceId = Get.arguments['deviceId'];
 
   StreamSubscription<ConnectionStateUpdate>? _connectionSubscription;
-  
+
   // Store characteristic streams to avoid multiple subscriptions
   final Map<String, Stream<List<int>>> _characteristicStreams = {};
 
   final count = 0.obs;
-  
+
   @override
   void onInit() {
     connectToDevice(deviceId);
@@ -36,7 +36,9 @@ class ConnectedDeviceController extends GetxController {
   }
 
   Future<List<int>> readCharacteristic(
-      Uuid serviceId, Uuid characteristicId) async {
+    Uuid serviceId,
+    Uuid characteristicId,
+  ) async {
     return await _bleServices.readCharacteristic(
       deviceId,
       serviceId,
@@ -45,19 +47,24 @@ class ConnectedDeviceController extends GetxController {
   }
 
   Stream<List<int>> subscribeToCharacteristic(
-      Uuid serviceId, Uuid characteristicId) {
+    Uuid serviceId,
+    Uuid characteristicId,
+  ) {
     final key = '${serviceId}_${characteristicId}';
-    
-    // Return existing stream if already subscribed
+
     if (_characteristicStreams.containsKey(key)) {
       return _characteristicStreams[key]!;
     }
 
-    // Create new broadcast stream
     final stream = _bleServices
         .subscribeToCharacteristic(deviceId, serviceId, characteristicId)
+        .map((data) {
+          print("NOTIFICATION RECEIVED: $data");
+
+          return data;
+        })
         .asBroadcastStream();
-    
+
     _characteristicStreams[key] = stream;
     return stream;
   }
@@ -81,7 +88,8 @@ class ConnectedDeviceController extends GetxController {
                         characteristicInstanceId: char.id.toString(),
                         isReadable: char.isReadable,
                         isWritableWithResponse: char.isWritableWithResponse,
-                        isWritableWithoutResponse: char.isWritableWithoutResponse,
+                        isWritableWithoutResponse:
+                            char.isWritableWithoutResponse,
                         isNotifiable: char.isNotifiable,
                         isIndicatable: char.isIndicatable,
                       ),
