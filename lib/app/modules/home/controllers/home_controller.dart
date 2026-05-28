@@ -8,7 +8,7 @@ class HomeController extends GetxController {
   final BleServices _bleServices = BleServices();
 
   RxList<DiscoveredDevice> devices = <DiscoveredDevice>[].obs;
-
+  RxInt deviceFound = 0.obs;
   RxBool isScanning = false.obs;
   RxString connectionState = "Disconnected".obs;
 
@@ -20,6 +20,7 @@ class HomeController extends GetxController {
     _bleServices.startScan(
       onDeviceFound: (deviceList) {
         devices.assignAll(deviceList);
+        deviceFound.value = deviceList.length;
       },
       onError: (error) {
         Get.snackbar("Error", error);
