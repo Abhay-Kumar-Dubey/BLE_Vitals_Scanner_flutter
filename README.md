@@ -65,6 +65,14 @@ flutter run
 
 ---
 
+## Run Python Ble simulator code
+
+```bash
+python3 ble_server.py
+```
+
+---
+
 # Android Permissions
 
 Add the following permissions in:
