@@ -1,17 +1,88 @@
-# ble_vitals_scanner
+# BLE Vitals Scanner
 
-A new Flutter project.
+A Flutter application built using **flutter_reactive_ble** and **GetX** that scans for BLE devices, connects to peripherals, discovers services and characteristics, and displays real-time data through BLE notifications.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Features
 
-A few resources to get you started if this is your first Flutter project:
+- BLE Device Scanning
+- Device Connection & Disconnection
+- Service Discovery
+- Characteristic Discovery
+- Characteristic Read Operations
+- Real-time Notification Subscription
+- Connection State Tracking
+- RSSI Display
+- Dynamic Service & Characteristic Explorer
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Tech Stack
+
+- Flutter
+- GetX
+- flutter_reactive_ble
+- Dart
+
+---
+
+# Setup Instructions
+
+## Prerequisites
+
+Ensure the following are installed:
+
+- Flutter SDK (Latest Stable)
+- Android Studio / VS Code
+- Android Device with BLE support
+- Python BLE Peripheral (Optional for testing)
+
+---
+
+## Clone Repository
+
+```bash
+git clone https://github.com/Abhay-Kumar-Dubey/BLE_Vitals_Scanner_flutter
+cd ble_vitals_scanner
+```
+
+---
+
+## Install Dependencies
+
+```bash
+flutter pub get
+```
+
+---
+
+## Run Application
+
+```bash
+flutter run
+```
+
+---
+
+# Android Permissions
+
+Add the following permissions in:
+
+```text
+android/app/src/main/AndroidManifest.xml
+```
+
+```xml
+<uses-permission android:name="android.permission.BLUETOOTH"/>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+```
+
+---
+
+# Conclusion
+
+This project demonstrates end-to-end BLE communication using Flutter and `flutter_reactive_ble`. It includes scanning, connecting, service discovery, characteristic reading, and real-time notification handling while following a clean architecture using GetX for state management.
