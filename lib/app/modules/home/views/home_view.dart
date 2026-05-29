@@ -15,32 +15,36 @@ class HomeView extends GetView<HomeController> {
         title: const Text('BLE Scanner'),
         centerTitle: true,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.blue[100],
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Container(
-                      height: 15,
-                      width: 15,
+          Obx(() {
+            return controller.isScanning.value
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.blue[100],
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              height: 15,
+                              width: 15,
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            SizedBox(width: 5),
+                            Text('Scanning..'),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(width: 5),
-                    Text('Scanning...'),
-                  ],
-                ),
-              ),
-            ),
-          ),
+                  )
+                : SizedBox.shrink();
+          }),
         ],
       ),
       body: Column(
@@ -49,7 +53,10 @@ class HomeView extends GetView<HomeController> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
             child: Container(
+              width: double.infinity,
+
               decoration: BoxDecoration(
+                color: Colors.white,
                 border: Border.all(width: 2, color: Colors.grey),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -57,7 +64,10 @@ class HomeView extends GetView<HomeController> {
                 padding: const EdgeInsets.all(10.0),
                 child: Column(
                   children: [
-                    Text("Devices Found"),
+                    Text(
+                      "Total Devices Found",
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
                     Obx(() => Text('${controller.deviceFound}')),
                   ],
                 ),
@@ -91,7 +101,12 @@ class HomeView extends GetView<HomeController> {
                           controller.stopScan;
                           Get.toNamed(
                             Routes.CONNECTED_DEVICE,
-                            arguments: {"deviceId": device.id},
+                            arguments: {
+                              "deviceId": device.id,
+                              "deviceName": device.name,
+                              "deviceRssi": device.rssi,
+                              "deviceAddress": device.id,
+                            },
                           );
                         },
                         child: Container(
@@ -164,9 +179,74 @@ class HomeView extends GetView<HomeController> {
             borderRadius: BorderRadius.circular(15),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Icon(Icons.refresh),
+            padding: const EdgeInsets.all(5.0),
+            child: Obx(
+              () =>
+                  RotatingRefreshIcon(isScanning: controller.isScanning.value),
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class RotatingRefreshIcon extends StatefulWidget {
+  final bool isScanning;
+
+  const RotatingRefreshIcon({super.key, required this.isScanning});
+
+  @override
+  State<RotatingRefreshIcon> createState() => _RotatingRefreshIconState();
+}
+
+class _RotatingRefreshIconState extends State<RotatingRefreshIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+
+    if (widget.isScanning) {
+      _animationController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant RotatingRefreshIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.isScanning) {
+      _animationController.repeat();
+    } else {
+      _animationController.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: _animationController,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.all(14.0),
+          child: Icon(Icons.refresh),
         ),
       ),
     );

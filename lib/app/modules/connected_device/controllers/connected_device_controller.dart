@@ -7,13 +7,17 @@ import 'package:get/get.dart';
 class ConnectedDeviceController extends GetxController {
   final BleServices _bleServices = BleServices();
 
-  RxList<DiscoveredDevice> devices = <DiscoveredDevice>[].obs;
+  // RxList<DiscoveredDevice> devices = <DiscoveredDevice>[].obs;
 
   RxBool isScanning = false.obs;
   RxString connectionState = "Disconnected".obs;
   RxList<DiscoveredService> services = <DiscoveredService>[].obs;
-
+  final Uuid serverUuid = Uuid.parse('12345678-1234-5678-1234-56789abcdef0');
+  final Uuid charUuid = Uuid.parse('12345678-1234-5678-1234-56789abcdef1');
+  final Uuid tempUuid = Uuid.parse('12345678-1234-5678-1234-56789abcdef2');
   String deviceId = Get.arguments['deviceId'];
+  String deviceName = Get.arguments['deviceName'];
+  String deviceRssi = Get.arguments['deviceRssi'].toString();
 
   StreamSubscription<ConnectionStateUpdate>? _connectionSubscription;
 
@@ -60,6 +64,7 @@ class ConnectedDeviceController extends GetxController {
         .subscribeToCharacteristic(deviceId, serviceId, characteristicId)
         .map((data) {
           print("NOTIFICATION RECEIVED: $data");
+          print("SUBSCRIBING: $serviceId -> $characteristicId");
 
           return data;
         })
